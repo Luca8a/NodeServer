@@ -21,19 +21,21 @@ mongoClient.open(function(err, mongoClient) { //C
       console.error("Error! Exiting... Must start MongoDB first");
       process.exit(1); //D
   }
-  var db = mongoClient.db("MyDatabase");  //E
-  collectionDriver = new CollectionDriver(db); //F
+   //E
+   //F
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
  
-app.get('/', function (req, res) {
-  res.send('<html><body><h1>Hello World</h1></body></html>');
-});
+
  
-app.get('/:collection', function(req, res) { //A
-   var params = req.params; //B
-   collectionDriver.findAll(req.params.collection, function(error, objs) { //C
+app.get('/:collection/:database', function(req, res) { //A
+    var params = req.params; //B
+    var collection = req.params.collection
+    var dataBase = req.params.database;
+    var db = mongoClient.db(dataBase);
+    collectionDriver = new CollectionDriver(db);
+   collectionDriver.findAll(collection, function(error, objs) { //C
     	  if (error) { res.send(400, error); } //D
 	      else { 
     	           res.set('Content-Type','application/json'); //G
@@ -42,10 +44,13 @@ app.get('/:collection', function(req, res) { //A
    	});
 });
  
-app.get('/:collection/:entity', function(req, res) { //I
+app.get('/:collection/:database/:entity', function(req, res) { //I
    var params = req.params;
    var entity = params.entity;
    var collection = params.collection;
+   var dataBase = req.params.database;
+   var db = mongoClient.db(dataBase);
+   collectionDriver = new CollectionDriver(db);
    if (entity) {
        collectionDriver.get(collection, entity, function(error, objs) { //J
           if (error) { res.send(400, error); }
@@ -56,19 +61,25 @@ app.get('/:collection/:entity', function(req, res) { //I
    }
 });
 
-app.post('/:collection', function(req, res) { //A
+app.post('/:collection/:database', function(req, res) { //A
     var object = req.body;
     var collection = req.params.collection;
+    var dataBase = req.params.database;
+    var db = mongoClient.db(dataBase);
+    collectionDriver = new CollectionDriver(db);
     collectionDriver.save(collection, object, function(err,docs) {
           if (err) { res.send(400, err); } 
           else { res.send(200, docs); } //B
      });
 });
 
-app.put('/:collection/:entity', function(req, res) { //A
+app.put('/:collection/:database/:entity', function(req, res) { //A
     var params = req.params;
     var entity = params.entity;
     var collection = params.collection;
+    var dataBase = req.params.database;
+    var db = mongoClient.db(dataBase);
+    collectionDriver = new CollectionDriver(db);
     if (entity) {
        collectionDriver.update(collection, req.body, entity, function(error, objs) { //B
           if (error) { res.send(400, error); }
@@ -80,10 +91,13 @@ app.put('/:collection/:entity', function(req, res) { //A
    }
 });
 
-app.delete('/:collection/:entity', function(req, res) { //A
+app.delete('/:collection/:database/:entity', function(req, res) { //A
     var params = req.params;
     var entity = params.entity;
     var collection = params.collection;
+    var dataBase = req.params.database;
+    var db = mongoClient.db(dataBase);
+    collectionDriver = new CollectionDriver(db);
     if (entity) {
        collectionDriver.delete(collection, entity, function(error, objs) { //B
           if (error) { res.send(400, error); }
